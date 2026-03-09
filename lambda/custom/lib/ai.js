@@ -3,6 +3,18 @@ const { CATEGORIES } = require('./content');
 const DEFAULT_MODEL = 'moonshotai/kimi-k2.5';
 const DEFAULT_MAX_SENTENCES = 3;
 const DEFAULT_MAX_WORDS = 90;
+const CATEGORY_INSTRUCTIONS = {
+  BUSINESS_IDEA:
+    'State a specific problem, the solution, and why it could scale. Keep it simple, concrete, and voice friendly.',
+  MINDSET_SHIFT:
+    'Deliver one sharp reframe about leverage, ownership, systems, scale, or decision making.',
+  OPPORTUNITY_SPOTTER:
+    'Train pattern recognition by pointing to a hidden business opportunity in ordinary operational friction.',
+  TEN_X_QUESTION:
+    'Ask one powerful expansion question. Keep it concise and make the final sentence a direct question.',
+  TODAYS_MOVE:
+    'Give one concrete move the user can take today. Make it strategic and immediately usable.',
+};
 
 function normalizeWhitespace(value) {
   return String(value || '')
@@ -102,16 +114,19 @@ function extractMessageContent(payload) {
 
 function buildPrompt({ category }) {
   const categoryLabel = CATEGORIES[category]?.promptLabel || CATEGORIES.TODAYS_MOVE.promptLabel;
+  const categoryInstruction = CATEGORY_INSTRUCTIONS[category] || CATEGORY_INSTRUCTIONS.TODAYS_MOVE;
 
   return [
     'Write one response for an Alexa skill called Secret Billionaire.',
     `Category: ${categoryLabel}.`,
     'Voice: premium, noir, strategic, mysterious, practical, concise, high agency.',
     'Theme: leverage, ownership, systems, distribution, recurring revenue, scale, opportunity recognition, empire building.',
+    `Category requirement: ${categoryInstruction}`,
     'Output: 1 to 3 sentences, 40 to 90 words, voice friendly, memorable, useful.',
     `Start with the exact label "${categoryLabel === "Today's Move" ? "Today's move" : CATEGORIES[category]?.label || "Today's move"}:".`,
     'Do not use bullet points, markdown, emojis, quotes, or citations.',
     'Do not sound generic, cheesy, spiritual, or like an Instagram motivation page.',
+    'Prefer concrete verbs, simple nouns, and specific business mechanics over metaphor.',
     'Do not include illegal tactics, deception, fraud, market manipulation, insider trading, tax evasion, or personalized investment, legal, or tax advice.',
     'Return only the final spoken copy.',
   ].join(' ');
@@ -137,7 +152,7 @@ async function requestOpenRouterInsight({
     },
     body: JSON.stringify({
       model,
-      temperature: 0.95,
+      temperature: 0.75,
       max_tokens: 180,
       reasoning: {
         effort: 'none',
