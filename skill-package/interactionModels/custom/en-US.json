@@ -1,0 +1,74 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "secret billionaire",
+      "intents": [
+        {
+          "name": "GetTodaysMoveIntent",
+          "samples": [
+            "today's move",
+            "give me today's move",
+            "what is today's move",
+            "tell me today's move",
+            "give me my move"
+          ]
+        },
+        {
+          "name": "GetMindsetShiftIntent",
+          "samples": [
+            "mindset shift",
+            "give me a mindset shift",
+            "what is the mindset shift",
+            "tell me a mindset shift"
+          ]
+        },
+        {
+          "name": "GetBusinessIdeaIntent",
+          "samples": [
+            "business idea",
+            "give me a business idea",
+            "what is the business idea",
+            "tell me a business idea",
+            "startup idea"
+          ]
+        },
+        {
+          "name": "GetTenXQuestionIntent",
+          "samples": [
+            "ten x question",
+            "give me a ten x question",
+            "what is the ten x question",
+            "ask me a ten x question",
+            "10 x question"
+          ]
+        },
+        {
+          "name": "GetOpportunitySpotterIntent",
+          "samples": [
+            "opportunity spotter",
+            "help me spot an opportunity",
+            "give me an opportunity spotter",
+            "show me an opportunity spotter",
+            "spot an opportunity"
+          ]
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        }
+      ]
+    }
+  }
+}

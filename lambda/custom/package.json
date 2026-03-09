@@ -1,0 +1,16 @@
+{
+  "name": "secret-billionaire-skill",
+  "version": "0.1.0",
+  "description": "Alexa skill that delivers short premium empire-building insights.",
+  "main": "index.js",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "ask-sdk-core": "^2.14.0"
+  }
+}

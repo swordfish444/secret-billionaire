@@ -1,0 +1,60 @@
+{
+  "manifest": {
+    "manifestVersion": "1.0",
+    "publishingInformation": {
+      "locales": {
+        "en-US": {
+          "name": "Secret Billionaire",
+          "summary": "Build your empire one move at a time with a premium daily-style strategic insight.",
+          "description": "Secret Billionaire is a premium noir-style Alexa ritual for builders, founders, executives, and entrepreneurial thinkers. Each time a customer opens the skill or asks for a category, the skill delivers one short, sharp empire-building insight focused on leverage, systems, ownership, opportunity recognition, and strategic decision making.",
+          "examplePhrases": [
+            "Alexa, open secret billionaire",
+            "Alexa, ask secret billionaire for today's move",
+            "Alexa, ask secret billionaire for a mindset shift",
+            "Alexa, ask secret billionaire for a business idea"
+          ],
+          "keywords": [
+            "business",
+            "wealth",
+            "strategy",
+            "entrepreneurship",
+            "mindset",
+            "founder",
+            "leverage"
+          ],
+          "smallIconUri": "https://raw.githubusercontent.com/swordfish444/secret-billionaire/main/assets/icon-108.png",
+          "largeIconUri": "https://raw.githubusercontent.com/swordfish444/secret-billionaire/main/assets/icon-512.png"
+        }
+      },
+      "isAvailableWorldwide": true,
+      "testingInstructions": "Test launch, today's move, mindset shift, business idea, ten X question, opportunity spotter, help, stop, and fallback. The skill is stateless and does not require account linking or customer-contact permissions. It uses OpenRouter with the Kimi 2.5 model to generate short branded business insights without sending customer contact information. If the API is unavailable, the skill falls back to an internal content library. Echo Show devices should render the branded APL background with the spoken insight and follow-up footer.",
+      "category": "BUSINESS_AND_FINANCE",
+      "distributionMode": "PUBLIC"
+    },
+    "apis": {
+      "custom": {
+        "endpoint": {
+          "sourceDir": "lambda/custom"
+        },
+        "interfaces": [
+          {
+            "type": "ALEXA_PRESENTATION_APL"
+          }
+        ]
+      }
+    },
+    "privacyAndCompliance": {
+      "allowsPurchases": false,
+      "usesPersonalInfo": false,
+      "isChildDirected": false,
+      "isExportCompliant": true,
+      "containsAds": false,
+      "locales": {
+        "en-US": {
+          "privacyPolicyUrl": "https://github.com/swordfish444/secret-billionaire/blob/main/docs/privacy-policy.md",
+          "termsOfUseUrl": "https://github.com/swordfish444/secret-billionaire/blob/main/docs/terms-of-use.md"
+        }
+      }
+    }
+  }
+}
