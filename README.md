@@ -34,7 +34,9 @@ Tagline: Build your empire. One move at a time.
 
 ## Environment
 
-The Lambda runtime can be configured with:
+The Lambda runtime target is AWS Lambda `nodejs22.x`.
+
+The Lambda environment can be configured with:
 
 - `OPENROUTER_TOKEN`: OpenRouter API token
 - `OPENROUTER_MODEL`: optional override for the model identifier, defaults to `moonshotai/kimi-k2.5`
