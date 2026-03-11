@@ -7,10 +7,18 @@
           "name": "GetTodaysMoveIntent",
           "samples": [
             "today's move",
+            "todays move",
             "give me today's move",
+            "give me todays move",
             "what is today's move",
+            "what is todays move",
             "tell me today's move",
-            "give me my move"
+            "give me my move",
+            "today move",
+            "my move",
+            "another move",
+            "next move",
+            "give me a move"
           ]
         },
         {
@@ -19,7 +27,12 @@
             "mindset shift",
             "give me a mindset shift",
             "what is the mindset shift",
-            "tell me a mindset shift"
+            "tell me a mindset shift",
+            "mindset",
+            "give me mindset",
+            "another mindset shift",
+            "next mindset shift",
+            "give me another mindset shift"
           ]
         },
         {
@@ -29,7 +42,13 @@
             "give me a business idea",
             "what is the business idea",
             "tell me a business idea",
-            "startup idea"
+            "startup idea",
+            "business",
+            "idea",
+            "another business idea",
+            "next business idea",
+            "give me another business idea",
+            "give me a startup idea"
           ]
         },
         {
@@ -39,7 +58,15 @@
             "give me a ten x question",
             "what is the ten x question",
             "ask me a ten x question",
-            "10 x question"
+            "10 x question",
+            "10x question",
+            "ten ex question",
+            "10 x",
+            "10x",
+            "give me a 10x question",
+            "ask me a 10x question",
+            "another 10x question",
+            "next 10x question"
           ]
         },
         {
@@ -49,7 +76,12 @@
             "help me spot an opportunity",
             "give me an opportunity spotter",
             "show me an opportunity spotter",
-            "spot an opportunity"
+            "spot an opportunity",
+            "opportunity",
+            "give me an opportunity",
+            "another opportunity spotter",
+            "next opportunity spotter",
+            "help me find an opportunity"
           ]
         },
         {

@@ -59,6 +59,9 @@ npm test
 - `Alexa, ask secret billionaire for a business idea`
 - `Alexa, ask secret billionaire for a ten x question`
 - `Alexa, ask secret billionaire to help me spot an opportunity`
+- `Alexa, ask secret billionaire for a 10x question`
+- `Alexa, ask secret billionaire for another business idea`
+- `Alexa, ask secret billionaire for another move`
 
 ## Current constraints
 
