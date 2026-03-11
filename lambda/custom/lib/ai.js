@@ -3,6 +3,7 @@ const { CATEGORIES } = require('./content');
 const DEFAULT_MODEL = 'moonshotai/kimi-k2.5';
 const DEFAULT_MAX_SENTENCES = 3;
 const DEFAULT_MAX_WORDS = 90;
+const DEFAULT_REQUEST_TIMEOUT_MS = 3500;
 const CATEGORY_INSTRUCTIONS = {
   BUSINESS_IDEA:
     'State a specific problem, the solution, and why it could scale. Keep it simple, concrete, and voice friendly.',
@@ -136,41 +137,52 @@ async function requestOpenRouterInsight({
   apiToken,
   category,
   fetchImpl = fetch,
+  timeoutMs = Number(process.env.AI_REQUEST_TIMEOUT_MS || DEFAULT_REQUEST_TIMEOUT_MS),
   model = process.env.OPENROUTER_MODEL || DEFAULT_MODEL,
 }) {
   if (!apiToken) {
     return null;
   }
 
-  const response = await fetchImpl('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiToken}`,
-      'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://github.com/swordfish444/secret-billionaire',
-      'X-Title': 'Secret Billionaire',
-    },
-    body: JSON.stringify({
-      model,
-      temperature: 0.75,
-      max_tokens: 180,
-      reasoning: {
-        effort: 'none',
-        exclude: true,
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(new Error('OPENROUTER_TIMEOUT')), timeoutMs);
+
+  let response;
+
+  try {
+    response = await fetchImpl('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiToken}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://github.com/swordfish444/secret-billionaire',
+        'X-Title': 'Secret Billionaire',
       },
-      messages: [
-        {
-          role: 'system',
-          content:
-            'You write sharp spoken micro-coaching for Alexa. Keep every answer compact, practical, ethical, and distinct.',
+      body: JSON.stringify({
+        model,
+        temperature: 0.75,
+        max_tokens: 180,
+        reasoning: {
+          effort: 'none',
+          exclude: true,
         },
-        {
-          role: 'user',
-          content: buildPrompt({ category }),
-        },
-      ],
-    }),
-  });
+        messages: [
+          {
+            role: 'system',
+            content:
+              'You write sharp spoken micro-coaching for Alexa. Keep every answer compact, practical, ethical, and distinct.',
+          },
+          {
+            role: 'user',
+            content: buildPrompt({ category }),
+          },
+        ],
+      }),
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   if (!response.ok) {
     const body = await response.text().catch(() => '');
@@ -219,6 +231,7 @@ async function generateInsight({
 }
 
 module.exports = {
+  DEFAULT_REQUEST_TIMEOUT_MS,
   DEFAULT_MAX_SENTENCES,
   DEFAULT_MAX_WORDS,
   buildPrompt,
