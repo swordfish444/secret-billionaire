@@ -84,13 +84,41 @@ function capabilityList() {
 
 function requestMetadata(handlerInput) {
   const request = handlerInput.requestEnvelope?.request || {};
+  const session = handlerInput.requestEnvelope?.session || {};
+  const interfaces = handlerInput.requestEnvelope?.context?.System?.device?.supportedInterfaces || {};
 
   return {
+    dialogState: request.dialogState || null,
+    hasApl: Boolean(interfaces['Alexa.Presentation.APL']),
     intentName: request.intent?.name || null,
     locale: request.locale || null,
     requestId: request.requestId || null,
     requestType: request.type || null,
+    sessionId: session.sessionId || null,
+    sessionNew: Boolean(session.new),
   };
+}
+
+function sessionDebugState(attributes) {
+  return {
+    currentCategory: attributes.currentCategory || null,
+    followUpPrompt: attributes.followUpPrompt || null,
+    followUpSourceCategory: attributes.followUpSourceCategory || null,
+    lastPromptId: attributes.lastPromptId || null,
+    pendingFollowUp: Boolean(attributes.pendingFollowUp),
+    recentCategories: sessionHistory(attributes, 'recentCategories').slice(-3),
+    recentInsightsCount: sessionHistory(attributes, 'recentInsights').length,
+    suggestedCategory: attributes.suggestedCategory || null,
+    turnCount: Number(attributes.turnCount || 0),
+  };
+}
+
+function preview(text, length = 180) {
+  if (!text) {
+    return null;
+  }
+
+  return text.length > length ? `${text.slice(0, length)}...` : text;
 }
 
 function logSkillEvent(handlerInput, eventName, details = {}) {
@@ -100,10 +128,8 @@ function logSkillEvent(handlerInput, eventName, details = {}) {
   console.log(
     JSON.stringify({
       ...metadata,
-      currentCategory: attributes.currentCategory || null,
       event: eventName,
-      pendingFollowUp: Boolean(attributes.pendingFollowUp),
-      suggestedCategory: attributes.suggestedCategory || null,
+      sessionState: sessionDebugState(attributes),
       ...details,
     }),
   );
@@ -143,9 +169,11 @@ async function insightResponse(handlerInput, category, options = {}) {
   saveSessionAttributes(handlerInput, attributes);
 
   logSkillEvent(handlerInput, 'insight_response', {
+    categorySource: options.categorySource || 'implicit',
     deliveredCategory: category,
-    deliveredInsight: insight,
-    nextPrompt: nextQuestion,
+    deliveredInsightPreview: preview(insight),
+    nextPromptPreview: preview(nextQuestion),
+    responseIntro: options.intro || null,
   });
 
   return buildVisualResponse(handlerInput, {
@@ -164,6 +192,7 @@ const LaunchRequestHandler = {
     logSkillEvent(handlerInput, 'launch_request');
 
     return insightResponse(handlerInput, DEFAULT_CATEGORY, {
+      categorySource: 'launch_default',
       intro: 'Welcome to Secret Billionaire.',
     });
   },
@@ -179,11 +208,13 @@ function intentHandler(intentName, category) {
     },
     async handle(handlerInput) {
       logSkillEvent(handlerInput, 'explicit_category_request', {
+        categorySource: 'explicit_intent',
         deliveredCategory: category,
-        intentName,
       });
 
-      return insightResponse(handlerInput, category);
+      return insightResponse(handlerInput, category, {
+        categorySource: 'explicit_intent',
+      });
     },
   };
 }
@@ -209,12 +240,16 @@ const GetAnotherInsightIntentHandler = {
     const category =
       (attributes.pendingFollowUp && attributes.suggestedCategory) ||
       nextCategory(attributes, attributes.currentCategory || DEFAULT_CATEGORY);
+    const categorySource = attributes.pendingFollowUp ? 'pending_follow_up' : 'rotation';
 
     logSkillEvent(handlerInput, 'another_insight_request', {
+      categorySource,
       deliveredCategory: category,
     });
 
-    return insightResponse(handlerInput, category);
+    return insightResponse(handlerInput, category, {
+      categorySource,
+    });
   },
 };
 
@@ -235,7 +270,7 @@ const HelpIntentHandler = {
     saveSessionAttributes(handlerInput, attributes);
 
     logSkillEvent(handlerInput, 'help_request', {
-      nextPrompt: nextQuestion,
+      nextPromptPreview: preview(nextQuestion),
     });
 
     return buildVisualResponse(handlerInput, {
@@ -282,12 +317,16 @@ const YesIntentHandler = {
     const category =
       (attributes.pendingFollowUp && attributes.suggestedCategory) ||
       DEFAULT_CATEGORY;
+    const categorySource = attributes.pendingFollowUp ? 'pending_follow_up' : 'default_yes';
 
     logSkillEvent(handlerInput, 'yes_intent_continue', {
+      categorySource,
       deliveredCategory: category,
     });
 
-    return insightResponse(handlerInput, category);
+    return insightResponse(handlerInput, category, {
+      categorySource,
+    });
   },
 };
 
@@ -334,7 +373,8 @@ const FallbackIntentHandler = {
     saveSessionAttributes(handlerInput, attributes);
 
     logSkillEvent(handlerInput, 'fallback', {
-      nextPrompt: nextQuestion,
+      nextPromptPreview: preview(nextQuestion),
+      speechPreview: preview(speech),
     });
 
     return buildVisualResponse(handlerInput, {
