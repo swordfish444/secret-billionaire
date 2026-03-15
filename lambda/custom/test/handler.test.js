@@ -106,3 +106,24 @@ test('no intent exits cleanly instead of continuing the loop', async () => {
   assert.equal(response.response.shouldEndSession, true);
   assert.match(outputSpeechText(response), /Build your empire\. One move at a time\./i);
 });
+
+test('fifth guided insight ends the session automatically', async () => {
+  let response = await handler(launchRequest(), {});
+  let attributes = response.sessionAttributes;
+
+  for (let step = 0; step < 3; step += 1) {
+    response = await handler(intentRequest('AMAZON.YesIntent', attributes), {});
+    attributes = response.sessionAttributes;
+    assert.equal(response.response.shouldEndSession, false);
+  }
+
+  response = await handler(intentRequest('AMAZON.YesIntent', attributes), {});
+
+  assert.equal(response.response.shouldEndSession, true);
+  assert.match(
+    outputSpeechText(response),
+    /That is enough for one session\. Build your empire\. One move at a time\./i,
+  );
+  assert.equal(response.sessionAttributes.pendingFollowUp, undefined);
+  assert.equal(response.sessionAttributes.suggestedCategory, undefined);
+});

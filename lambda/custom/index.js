@@ -10,6 +10,7 @@ const {
 } = require('./lib/content');
 
 const MAX_SESSION_HISTORY = 6;
+const MAX_GUIDED_TURNS = 5;
 const DEFAULT_CATEGORY = 'TODAYS_MOVE';
 
 function buildVisualResponse(
@@ -163,23 +164,40 @@ async function insightResponse(handlerInput, category, options = {}) {
 
   pushSessionHistory(attributes, 'recentCategories', category);
   pushSessionHistory(attributes, 'recentInsights', insight);
-  setFollowUpState(attributes, category, suggestedCategory);
-  attributes.followUpPrompt = nextQuestion;
   attributes.turnCount = Number(attributes.turnCount || 0) + 1;
+  const shouldEndSession = attributes.turnCount >= MAX_GUIDED_TURNS;
+
+  if (shouldEndSession) {
+    clearFollowUpState(attributes);
+  } else {
+    setFollowUpState(attributes, category, suggestedCategory);
+    attributes.followUpPrompt = nextQuestion;
+  }
   saveSessionAttributes(handlerInput, attributes);
 
   logSkillEvent(handlerInput, 'insight_response', {
     categorySource: options.categorySource || 'implicit',
     deliveredCategory: category,
     deliveredInsightPreview: preview(insight),
-    nextPromptPreview: preview(nextQuestion),
+    maxGuidedTurns: MAX_GUIDED_TURNS,
+    nextPromptPreview: shouldEndSession ? null : preview(nextQuestion),
     responseIntro: options.intro || null,
+    shouldEndSession,
   });
 
+  const speech = shouldEndSession
+    ? [options.intro, insight, 'That is enough for one session. Build your empire. One move at a time.']
+      .filter(Boolean)
+      .join(' ')
+    : [options.intro, insight, nextQuestion].filter(Boolean).join(' ');
+
   return buildVisualResponse(handlerInput, {
-    footer: options.footer || nextQuestion,
-    reprompt: options.reprompt || nextQuestion,
-    speech: [options.intro, insight, nextQuestion].filter(Boolean).join(' '),
+    footer: shouldEndSession
+      ? 'That is enough for one session. Build your empire. One move at a time.'
+      : options.footer || nextQuestion,
+    reprompt: shouldEndSession ? undefined : options.reprompt || nextQuestion,
+    shouldEndSession,
+    speech,
     subtitle: insight,
   });
 }
