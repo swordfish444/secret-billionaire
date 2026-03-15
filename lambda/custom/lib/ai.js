@@ -4,70 +4,89 @@ const DEFAULT_MODEL = 'moonshotai/kimi-k2.5';
 const DEFAULT_MAX_SENTENCES = 3;
 const DEFAULT_MAX_WORDS = 90;
 const DEFAULT_REQUEST_TIMEOUT_MS = 5500;
-const MAX_RECENT_INSIGHTS = 12;
-const MAX_RECENT_PROMPT_REFERENCES = 4;
+const MAX_RECENT_INSIGHTS = 18;
+const MAX_RECENT_PROMPT_REFERENCES = 6;
 const EVERYDAY_AUDIENCES = [
-  'a salaried professional building a side income',
-  'an early founder testing a first offer',
-  'a freelancer trying to become an owner instead of just a worker',
-  'a small business operator trying to buy back time',
-  'a creator or consultant trying to package expertise into recurring revenue',
-  'an ambitious person with limited time, limited cash, and real-world responsibilities',
+  'a high school student with ambition and limited experience',
+  'a college student trying to turn curiosity into real momentum',
+  'a salaried professional trying to become more valuable and more independent',
+  'a creator trying to build a stronger personal brand',
+  'a freelancer trying to create leverage instead of only selling hours',
+  'an early founder trying to move faster without a big team',
+  'an ambitious person with limited time, limited cash, and plenty of upside',
+];
+const EVERYDAY_DOMAINS = [
+  'studying and learning faster',
+  'writing, messaging, and communication',
+  'planning the week and making better decisions',
+  'organizing notes, ideas, and research',
+  'job searching and career growth',
+  'content creation and building a personal brand',
+  'turning a side project into real momentum',
+  'handling everyday admin with less stress',
 ];
 const CATEGORY_ANGLES = {
   BUSINESS_IDEA: [
-    'local service operators',
-    'freelancers and consultants',
-    'creators and audience businesses',
-    'small B2B workflow pain',
-    'administrative bottlenecks',
-    'follow-up and conversion friction',
+    'AI prompt systems for everyday work',
+    'AI services that save time for busy people',
+    'AI brand-building support for creators and professionals',
+    'AI workflows that turn messy notes into useful output',
+    'AI assistance for planning, studying, and decision making',
+    'AI automations that remove simple but repeated friction',
   ],
   MINDSET_SHIFT: [
-    'owning the customer path',
-    'turning expertise into an asset',
-    'buying back time with systems',
-    'replacing busyness with leverage',
-    'building recurring revenue from ordinary skill',
-    'making decisions with scale in mind',
+    'treating AI like leverage instead of novelty',
+    'using systems to outpace raw effort',
+    'turning curiosity into execution faster',
+    'building confidence through output instead of waiting',
+    'thinking like an owner with simple tools',
+    'compounding skill by capturing and reusing good work',
   ],
   OPPORTUNITY_SPOTTER: [
-    'repeated household or work annoyances',
-    'messy follow-up processes',
-    'fragmented information across tools',
-    'local businesses with manual workflows',
-    'small teams stuck in spreadsheets and inboxes',
-    'services people delay but still need',
+    'blank-page friction',
+    'manual copy-paste work',
+    'slow follow-up and weak communication',
+    'people drowning in information without clarity',
+    'overwhelmed students and professionals',
+    'ordinary tasks that would improve with AI guidance',
   ],
   TEN_X_QUESTION: [
-    'delegation and systems',
-    'audience and distribution',
-    'pricing and offer design',
-    'recurring revenue',
-    'time leverage',
-    'niche positioning',
+    'faster learning with AI',
+    'building a personal brand with systems',
+    'delegating first drafts and repetitive thinking',
+    'turning a skill into something scalable',
+    'using AI to create more shots on goal',
+    'compounding output instead of reacting all day',
   ],
   TODAYS_MOVE: [
-    'packaging a service',
-    'validating demand quickly',
-    'documenting a repeatable process',
-    'improving follow-up',
-    'finding a profitable niche problem',
-    'creating simple leverage from current assets',
+    'one AI action that saves time today',
+    'one AI workflow that improves clarity',
+    'one AI move that builds confidence through action',
+    'one AI habit that turns ideas into assets',
+    'one practical way to use AI for communication or planning',
+    'one AI system that helps an ordinary ambitious person move faster',
   ],
 };
+const RESPONSE_SHAPES = [
+  'a simple action the user can try today',
+  'a hidden advantage the user can unlock with one better system',
+  'a plain-language reframe that makes AI feel usable right now',
+  'a before-and-after contrast between manual effort and AI leverage',
+  'a specific pattern ordinary ambitious people can copy immediately',
+  'a concrete way to turn messy input into useful output',
+];
 const RECENT_OUTPUTS = [];
 const CATEGORY_INSTRUCTIONS = {
   BUSINESS_IDEA:
-    'State a specific problem, the solution, and why it could scale. Keep it simple, concrete, and voice friendly.',
+    'State a simple AI-enabled offer, product, service, or workflow. Include the problem, the solution, and why it could scale. Keep it approachable for beginners.',
   MINDSET_SHIFT:
-    'Deliver one sharp reframe about leverage, ownership, systems, scale, or decision making.',
+    'Deliver one sharp reframe about AI leverage, systems, ownership, speed, or compounding. It should feel empowering, not intimidating.',
   OPPORTUNITY_SPOTTER:
-    'Train pattern recognition by pointing to a hidden business opportunity in ordinary operational friction.',
+    'Point to an ordinary place where AI can remove friction, increase output, or create new value. Make the opportunity easy to recognize.',
   TEN_X_QUESTION:
-    'Ask one powerful expansion question. Keep it concise and make the final sentence a direct question.',
+    'Ask one powerful question about using AI, systems, or leverage to expand the user’s future. Keep the final sentence a direct question.',
   TODAYS_MOVE:
-    'Give one concrete move the user can take today. Make it strategic and immediately usable.',
+    'Give one simple AI-powered move the user can take today. It must be specific, practical, and realistic for almost anyone.',
 };
 
 function normalizeWhitespace(value) {
@@ -166,13 +185,19 @@ function escapeRegExp(value) {
 function ensureCategoryLead(text, category) {
   const label = CATEGORIES[category]?.label || CATEGORIES.TODAYS_MOVE.label;
   const leadPattern = new RegExp(`^${escapeRegExp(label)}\\s*:`, 'i');
-  const normalized = normalizeWhitespace(text).replace(/^secret billionaire[.!?,:\s-]*/i, '');
+  const normalized = normalizeWhitespace(text)
+    .replace(/[*_`#]+/g, '')
+    .replace(/^secret billionaire[.!?,:\s-]*/i, '');
+  const collapsedLead = normalized.replace(
+    new RegExp(`^(?:${escapeRegExp(label)}\\s*:\\s*)+`, 'i'),
+    `${label}: `,
+  );
 
-  if (leadPattern.test(normalized)) {
-    return normalized;
+  if (leadPattern.test(collapsedLead)) {
+    return collapsedLead;
   }
 
-  return `${label}: ${normalized}`;
+  return `${label}: ${collapsedLead}`;
 }
 
 function openingFragment(text) {
@@ -231,7 +256,7 @@ function isTooSimilar(text, recentInsights = []) {
     return (
       normalized === recentNormalized ||
       opening === openingFragment(candidate) ||
-      similarityScore(normalized, recentNormalized) >= 0.72
+      similarityScore(normalized, recentNormalized) >= 0.68
     );
   });
 }
@@ -274,35 +299,44 @@ function buildPrompt({ category, recentInsights = [], attempt = 0 }) {
   const categoryLabel = CATEGORIES[category]?.promptLabel || CATEGORIES.TODAYS_MOVE.promptLabel;
   const categoryInstruction = CATEGORY_INSTRUCTIONS[category] || CATEGORY_INSTRUCTIONS.TODAYS_MOVE;
   const audienceLens = randomChoice(EVERYDAY_AUDIENCES, EVERYDAY_AUDIENCES[0]);
+  const everydayDomain = randomChoice(EVERYDAY_DOMAINS, EVERYDAY_DOMAINS[0]);
   const focusArea = randomChoice(CATEGORY_ANGLES[category], CATEGORY_ANGLES.TODAYS_MOVE[0]);
+  const responseShape = randomChoice(RESPONSE_SHAPES, RESPONSE_SHAPES[0]);
   const avoidReferences = recentPromptReferences(recentInsights);
   const noveltyDirective =
     attempt > 0
-      ? 'Increase novelty. Change the framing, examples, and business surface dramatically from earlier attempts.'
-      : 'Make the response feel fresh, concrete, and different from common business-coaching cliches.';
+      ? 'Increase novelty. Change the framing, use a different situation, and avoid repeating the same advice shape or opening words.'
+      : 'Make the response feel fresh, practical, and different from generic motivational advice.';
 
   return [
     'Write one response for an Alexa skill called Secret Billionaire.',
     `Category: ${categoryLabel}.`,
     'Voice: premium, noir, strategic, mysterious, practical, concise, high agency.',
-    'Theme: leverage, ownership, systems, distribution, recurring revenue, scale, opportunity recognition, empire building.',
+    'Theme: AI leverage, systems, ownership, speed, compounding, useful output, opportunity recognition, and empire building through modern tools.',
     `Target audience: ${audienceLens}.`,
+    `Everyday domain for this response: ${everydayDomain}.`,
     `Focus area for this response: ${focusArea}.`,
+    `Response shape for this turn: ${responseShape}.`,
     `Category requirement: ${categoryInstruction}`,
     'Output: 1 to 3 sentences, 40 to 90 words, voice friendly, memorable, useful.',
     `Start with the exact label "${categoryLabel === "Today's Move" ? "Today's move" : CATEGORIES[category]?.label || "Today's move"}:".`,
+    'Make it simple enough that a smart high school student could understand it and act on it.',
+    'Keep it broadly applicable to students, employees, creators, freelancers, and early builders. Make it feel useful to almost anyone with ambition.',
+    'Center the advice on how AI, agentic AI, automation, or AI-native tools can help the user think better, move faster, communicate more clearly, build useful assets, or spot opportunities.',
+    'Mention AI, an AI tool, or an AI agent explicitly in the first sentence.',
+    'Keep the example anchored in the everyday domain above unless a broader frame is absolutely necessary.',
+    'Default to examples from school, work, side projects, content creation, planning, communication, and everyday productivity before using company-scale or leadership-heavy examples.',
+    'Avoid executive, enterprise, or boardroom framing unless it stays immediately relatable to a beginner.',
+    'Do not mention specific AI brand names unless absolutely necessary.',
+    'Avoid narrow industry examples, niche jargon, heavy operational complexity, or assumptions about large teams, big budgets, venture capital, or owning multiple companies.',
     'Do not use bullet points, markdown, emojis, quotes, or citations.',
-    'Do not sound generic, cheesy, spiritual, or like an Instagram motivation page.',
-    'Prefer concrete verbs, simple nouns, and specific business mechanics over metaphor.',
-    'Speak to real people building toward wealth from ordinary starting conditions. Use side hustles, local businesses, service offers, creator businesses, workflow problems, follow-up, packaging, systems, pricing, audience, and recurring revenue as your raw material.',
-    'Avoid sounding like the user already owns a conglomerate, private equity firm, or multinational holding company.',
-    'Do not default to buying companies, hiring executives, raising venture capital, or abstract empire language unless it is grounded in a move a normal ambitious user can act on now.',
+    'Do not repeat the category label more than once.',
+    'Do not sound generic, cheesy, spiritual, intimidating, or like an Instagram motivation page.',
+    'Prefer concrete verbs, simple nouns, and a clear next action over theory.',
     noveltyDirective,
     'Do not include illegal tactics, deception, fraud, market manipulation, insider trading, tax evasion, or personalized investment, legal, or tax advice.',
     ...(avoidReferences.length
-      ? [
-          `Avoid repeating or paraphrasing these recent ideas: ${avoidReferences.join(' || ')}.`,
-        ]
+      ? [`Avoid repeating or paraphrasing these recent ideas: ${avoidReferences.join(' || ')}.`]
       : []),
     'Return only the final spoken copy.',
   ].join(' ');
@@ -336,7 +370,7 @@ async function requestOpenRouterInsight({
       },
       body: JSON.stringify({
         model,
-        temperature: 0.92,
+        temperature: 1,
         max_tokens: 180,
         reasoning: {
           effort: 'none',
@@ -346,7 +380,7 @@ async function requestOpenRouterInsight({
           {
             role: 'system',
             content:
-              'You write sharp spoken micro-coaching for Alexa. Keep every answer compact, practical, ethical, and distinct.',
+              'You write sharp spoken micro-coaching for Alexa. Keep every answer compact, practical, ethical, distinct, and easy to act on.',
           },
           {
             role: 'user',

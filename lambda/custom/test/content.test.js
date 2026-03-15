@@ -29,7 +29,7 @@ test('nextCategoryFor rotates to a valid follow-up category', () => {
     exclude: ['MINDSET_SHIFT'],
   });
 
-  assert.ok(['BUSINESS_IDEA', 'TEN_X_QUESTION'].includes(category));
+  assert.ok(['BUSINESS_IDEA', 'OPPORTUNITY_SPOTTER'].includes(category));
 });
 
 test('suggestionLabelFor returns speech-friendly labels', () => {

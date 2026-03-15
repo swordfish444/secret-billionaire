@@ -9,7 +9,8 @@ const {
   suggestionLabelFor,
 } = require('./lib/content');
 
-const MAX_SESSION_HISTORY = 4;
+const MAX_SESSION_HISTORY = 6;
+const DEFAULT_CATEGORY = 'TODAYS_MOVE';
 
 function buildVisualResponse(
   handlerInput,
@@ -40,7 +41,8 @@ function buildVisualResponse(
 }
 
 function sessionAttributes(handlerInput) {
-  return handlerInput.attributesManager.getSessionAttributes();
+  const attributes = handlerInput.attributesManager.getSessionAttributes();
+  return attributes && typeof attributes === 'object' ? attributes : {};
 }
 
 function saveSessionAttributes(handlerInput, attributes) {
@@ -56,30 +58,95 @@ function pushSessionHistory(attributes, key, value) {
   attributes[key] = next;
 }
 
+function clearFollowUpState(attributes) {
+  delete attributes.pendingFollowUp;
+  delete attributes.suggestedCategory;
+  delete attributes.followUpPrompt;
+  delete attributes.followUpSourceCategory;
+  delete attributes.lastPromptId;
+}
+
+function setFollowUpState(attributes, category, suggestedCategory) {
+  attributes.currentCategory = category;
+  attributes.pendingFollowUp = true;
+  attributes.suggestedCategory = suggestedCategory;
+  attributes.followUpSourceCategory = category;
+  attributes.lastPromptId = `${category}-${Date.now()}`;
+}
+
 function followUpQuestion(category) {
-  return `Would you like ${suggestionLabelFor(category)} next?`;
+  return `Would you like ${suggestionLabelFor(category)} next? Just say yes or no.`;
+}
+
+function capabilityList() {
+  return "You can ask for today's move, a mindset shift, a business idea, a ten X question, or an opportunity spotter.";
+}
+
+function requestMetadata(handlerInput) {
+  const request = handlerInput.requestEnvelope?.request || {};
+
+  return {
+    intentName: request.intent?.name || null,
+    locale: request.locale || null,
+    requestId: request.requestId || null,
+    requestType: request.type || null,
+  };
+}
+
+function logSkillEvent(handlerInput, eventName, details = {}) {
+  const attributes = sessionAttributes(handlerInput);
+  const metadata = requestMetadata(handlerInput);
+
+  console.log(
+    JSON.stringify({
+      ...metadata,
+      currentCategory: attributes.currentCategory || null,
+      event: eventName,
+      pendingFollowUp: Boolean(attributes.pendingFollowUp),
+      suggestedCategory: attributes.suggestedCategory || null,
+      ...details,
+    }),
+  );
+}
+
+function nextCategory(attributes, category, explicitSuggestion) {
+  if (explicitSuggestion) {
+    return explicitSuggestion;
+  }
+
+  const recentCategories = sessionHistory(attributes, 'recentCategories');
+  const exclude = [
+    category,
+    attributes.suggestedCategory,
+    ...recentCategories.slice(-3),
+  ].filter(Boolean);
+
+  return nextCategoryFor(category, { exclude });
 }
 
 async function insightResponse(handlerInput, category, options = {}) {
   const attributes = sessionAttributes(handlerInput);
-  const recentCategories = sessionHistory(attributes, 'recentCategories');
   const recentInsights = sessionHistory(attributes, 'recentInsights');
   const insight = await generateInsight({
     category,
     fallback: ({ exclude } = {}) => fallbackInsightFor(category, { exclude }),
     recentInsights,
   });
-  const suggestedCategory =
-    options.suggestedCategory ||
-    nextCategoryFor(category, {
-      exclude: [...recentCategories.slice(-2), category],
-    });
+  const suggestedCategory = nextCategory(attributes, category, options.suggestedCategory);
   const nextQuestion = followUpQuestion(suggestedCategory);
 
   pushSessionHistory(attributes, 'recentCategories', category);
   pushSessionHistory(attributes, 'recentInsights', insight);
-  attributes.suggestedCategory = suggestedCategory;
+  setFollowUpState(attributes, category, suggestedCategory);
+  attributes.followUpPrompt = nextQuestion;
+  attributes.turnCount = Number(attributes.turnCount || 0) + 1;
   saveSessionAttributes(handlerInput, attributes);
+
+  logSkillEvent(handlerInput, 'insight_response', {
+    deliveredCategory: category,
+    deliveredInsight: insight,
+    nextPrompt: nextQuestion,
+  });
 
   return buildVisualResponse(handlerInput, {
     footer: options.footer || nextQuestion,
@@ -94,7 +161,9 @@ const LaunchRequestHandler = {
     return Alexa.getRequestType(handlerInput.requestEnvelope) === 'LaunchRequest';
   },
   async handle(handlerInput) {
-    return insightResponse(handlerInput, 'TODAYS_MOVE', {
+    logSkillEvent(handlerInput, 'launch_request');
+
+    return insightResponse(handlerInput, DEFAULT_CATEGORY, {
       intro: 'Welcome to Secret Billionaire.',
     });
   },
@@ -109,6 +178,11 @@ function intentHandler(intentName, category) {
       );
     },
     async handle(handlerInput) {
+      logSkillEvent(handlerInput, 'explicit_category_request', {
+        deliveredCategory: category,
+        intentName,
+      });
+
       return insightResponse(handlerInput, category);
     },
   };
@@ -122,6 +196,7 @@ const GetOpportunitySpotterIntentHandler = intentHandler(
   'GetOpportunitySpotterIntent',
   'OPPORTUNITY_SPOTTER',
 );
+
 const GetAnotherInsightIntentHandler = {
   canHandle(handlerInput) {
     return (
@@ -131,7 +206,14 @@ const GetAnotherInsightIntentHandler = {
   },
   async handle(handlerInput) {
     const attributes = sessionAttributes(handlerInput);
-    const category = attributes.suggestedCategory || 'TODAYS_MOVE';
+    const category =
+      (attributes.pendingFollowUp && attributes.suggestedCategory) ||
+      nextCategory(attributes, attributes.currentCategory || DEFAULT_CATEGORY);
+
+    logSkillEvent(handlerInput, 'another_insight_request', {
+      deliveredCategory: category,
+    });
+
     return insightResponse(handlerInput, category);
   },
 };
@@ -145,15 +227,24 @@ const HelpIntentHandler = {
   },
   handle(handlerInput) {
     const attributes = sessionAttributes(handlerInput);
-    attributes.suggestedCategory = 'TODAYS_MOVE';
+    const suggestedCategory = DEFAULT_CATEGORY;
+    const nextQuestion = followUpQuestion(suggestedCategory);
+
+    setFollowUpState(attributes, attributes.currentCategory || DEFAULT_CATEGORY, suggestedCategory);
+    attributes.followUpPrompt = nextQuestion;
     saveSessionAttributes(handlerInput, attributes);
+
+    logSkillEvent(handlerInput, 'help_request', {
+      nextPrompt: nextQuestion,
+    });
+
     return buildVisualResponse(handlerInput, {
-      footer: "Would you like today's move next?",
-      reprompt: "Would you like today's move next?",
+      footer: nextQuestion,
+      reprompt: nextQuestion,
       speech:
-        "Secret Billionaire delivers one short empire-building insight at a time for ambitious people building real leverage from ordinary starting points. Ask for today's move, a mindset shift, a business idea, a ten X question, or an opportunity spotter. Would you like today's move next?",
+        `Secret Billionaire gives you short AI-powered moves for life, work, learning, and building leverage. ${capabilityList()} ${nextQuestion}`,
       subtitle:
-        "Ask for today's move, a mindset shift, a business idea, a ten X question, or an opportunity spotter.",
+        "Short AI-powered moves for life, work, learning, and building leverage.",
     });
   },
 };
@@ -166,6 +257,12 @@ const NoIntentHandler = {
     );
   },
   handle(handlerInput) {
+    const attributes = sessionAttributes(handlerInput);
+    clearFollowUpState(attributes);
+    saveSessionAttributes(handlerInput, attributes);
+
+    logSkillEvent(handlerInput, 'no_intent_end');
+
     return handlerInput.responseBuilder
       .speak('Understood. Build your empire. One move at a time.')
       .withShouldEndSession(true)
@@ -182,7 +279,14 @@ const YesIntentHandler = {
   },
   async handle(handlerInput) {
     const attributes = sessionAttributes(handlerInput);
-    const category = attributes.suggestedCategory || 'TODAYS_MOVE';
+    const category =
+      (attributes.pendingFollowUp && attributes.suggestedCategory) ||
+      DEFAULT_CATEGORY;
+
+    logSkillEvent(handlerInput, 'yes_intent_continue', {
+      deliveredCategory: category,
+    });
+
     return insightResponse(handlerInput, category);
   },
 };
@@ -195,6 +299,12 @@ const CancelAndStopIntentHandler = {
     );
   },
   handle(handlerInput) {
+    const attributes = sessionAttributes(handlerInput);
+    clearFollowUpState(attributes);
+    saveSessionAttributes(handlerInput, attributes);
+
+    logSkillEvent(handlerInput, 'cancel_or_stop');
+
     return handlerInput.responseBuilder
       .speak('Understood. Build your empire. One move at a time.')
       .withShouldEndSession(true)
@@ -211,15 +321,27 @@ const FallbackIntentHandler = {
   },
   handle(handlerInput) {
     const attributes = sessionAttributes(handlerInput);
-    const suggestedCategory = attributes.suggestedCategory || 'TODAYS_MOVE';
+    const suggestedCategory = attributes.suggestedCategory || DEFAULT_CATEGORY;
     const nextQuestion = followUpQuestion(suggestedCategory);
+    const speech = attributes.pendingFollowUp
+      ? `Say yes for ${suggestionLabelFor(suggestedCategory)}, or ask for another category directly. ${capabilityList()}`
+      : `${capabilityList()} ${nextQuestion}`;
+
+    attributes.followUpPrompt = nextQuestion;
+    if (!attributes.pendingFollowUp) {
+      setFollowUpState(attributes, attributes.currentCategory || DEFAULT_CATEGORY, suggestedCategory);
+    }
+    saveSessionAttributes(handlerInput, attributes);
+
+    logSkillEvent(handlerInput, 'fallback', {
+      nextPrompt: nextQuestion,
+    });
+
     return buildVisualResponse(handlerInput, {
       footer: nextQuestion,
       reprompt: nextQuestion,
-      speech:
-        `I can help with today's move, a mindset shift, a business idea, a ten X question, or an opportunity spotter. ${nextQuestion}`,
-      subtitle:
-        "Ask for today's move, a mindset shift, a business idea, a ten X question, or an opportunity spotter.",
+      speech,
+      subtitle: capabilityList(),
     });
   },
 };
@@ -229,6 +351,7 @@ const SessionEndedRequestHandler = {
     return Alexa.getRequestType(handlerInput.requestEnvelope) === 'SessionEndedRequest';
   },
   handle(handlerInput) {
+    logSkillEvent(handlerInput, 'session_ended');
     return handlerInput.responseBuilder.getResponse();
   },
 };
@@ -244,9 +367,8 @@ const ErrorHandler = {
       footer: 'Try again in a moment.',
       reprompt: 'Try again in a moment.',
       speech:
-        "The line went quiet for a second. Ask again for today's move, a mindset shift, a business idea, a ten X question, or an opportunity spotter.",
-      subtitle:
-        "Ask again for today's move, a mindset shift, a business idea, a ten X question, or an opportunity spotter.",
+        `The line went quiet for a second. ${capabilityList()}`,
+      subtitle: capabilityList(),
     });
   },
 };

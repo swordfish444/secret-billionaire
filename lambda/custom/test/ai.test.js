@@ -28,8 +28,10 @@ test('buildPrompt includes the category and grounded brand guardrails', () => {
 
   assert.match(prompt, /Business Idea/);
   assert.match(prompt, /premium, noir, strategic/);
-  assert.match(prompt, /ordinary starting conditions/);
-  assert.match(prompt, /Avoid sounding like the user already owns a conglomerate/);
+  assert.match(prompt, /high school student/);
+  assert.match(prompt, /broadly applicable/);
+  assert.match(prompt, /agentic AI/);
+  assert.match(prompt, /Avoid narrow industry examples/);
   assert.match(prompt, /illegal tactics/);
 });
 
@@ -101,4 +103,15 @@ test('generateInsight retries and prefers a non-repeated AI response', async () 
   });
 
   assert.match(insight, /ask three paying customers/i);
+});
+
+test('generateInsight prompt avoids niche operator framing', () => {
+  const prompt = buildPrompt({
+    category: 'TODAYS_MOVE',
+    recentInsights: ['Today\'s move: use AI to clean up your notes.'],
+  });
+
+  assert.doesNotMatch(prompt, /conglomerate/i);
+  assert.match(prompt, /simple enough that a smart high school student/i);
+  assert.match(prompt, /students, employees, creators, freelancers, and early builders/i);
 });
