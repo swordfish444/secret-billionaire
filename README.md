@@ -9,7 +9,8 @@ Tagline: Build your empire. One move at a time.
 - Stateless and lightweight.
 - No accounts, memory, persistence, reminders, dashboards, or gamification.
 - One short insight at a time, tuned for voice.
-- Echo Show devices render a branded multimodal response with Alexa Presentation Language.
+- Each response recommends one next category so the customer can simply say yes or no to continue.
+- Echo Show devices render a branded multimodal response with Alexa Presentation Language and a muted background video.
 
 ## Content categories
 
@@ -22,7 +23,8 @@ Tagline: Build your empire. One move at a time.
 ## Message generation
 
 - The skill uses OpenRouter with the Kimi 2.5 model to generate short branded coaching moments on demand.
-- The prompt is constrained to practical, ethical, voice-friendly wealth-building insights.
+- The prompt is constrained to practical, ethical, voice-friendly wealth-building insights for real people building toward ownership from ordinary starting points.
+- The generator avoids repeating recent ideas during a session and also rejects overly similar fresh outputs before speaking them.
 - If OpenRouter is unavailable or `OPENROUTER_TOKEN` is not configured, the skill falls back to an internal content library.
 
 ## Repo layout
@@ -61,6 +63,8 @@ npm test
 - `Alexa, ask secret billionaire to help me spot an opportunity`
 - `Alexa, ask secret billionaire for another business idea`
 - `Alexa, ask secret billionaire for another move`
+- `Yes`
+- `No`
 
 ## Current constraints
 

@@ -2,6 +2,8 @@ const ICON_URL =
   'https://raw.githubusercontent.com/swordfish444/secret-billionaire/main/assets/icon-512.png';
 const BACKGROUND_URL =
   'https://raw.githubusercontent.com/swordfish444/secret-billionaire/main/assets/show-background.png';
+const VIDEO_URL =
+  'https://raw.githubusercontent.com/swordfish444/secret-billionaire/main/assets/show-video-muted.mp4';
 
 function supportsApl(handlerInput) {
   return Boolean(
@@ -33,6 +35,14 @@ function buildDocument({ footer, subtitle, title }) {
             {
               type: 'AlexaBackground',
               backgroundImageSource: BACKGROUND_URL,
+              backgroundVideoSource: [
+                {
+                  url: VIDEO_URL,
+                  repeatCount: 3,
+                },
+              ],
+              videoAudioTrack: 'none',
+              videoAutoPlay: true,
               width: '100vw',
               height: '100vh',
             },
@@ -160,6 +170,7 @@ function decorateResponseBuilder(
 module.exports = {
   BACKGROUND_URL,
   ICON_URL,
+  VIDEO_URL,
   decorateResponseBuilder,
   supportsApl,
 };

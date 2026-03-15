@@ -5,8 +5,8 @@
       "locales": {
         "en-US": {
           "name": "Secret Billionaire",
-          "summary": "Build your empire one move at a time with a premium daily-style strategic insight.",
-          "description": "Secret Billionaire is a premium noir-style Alexa ritual for builders, founders, executives, and entrepreneurial thinkers. Each time a customer opens the skill or asks for a category, the skill delivers one short, sharp empire-building insight focused on leverage, systems, ownership, opportunity recognition, and strategic decision making.",
+          "summary": "Build your empire one move at a time with a sharp strategic move, mindset shift, idea, or question.",
+          "description": "Secret Billionaire is a premium noir-style Alexa ritual for ambitious people building wealth from real-world starting points. Each time a customer opens the skill or asks for a category, the skill delivers one short, sharp coaching moment focused on leverage, systems, ownership, recurring revenue, opportunity recognition, and high-agency decision making. The experience stays concise, practical, and voice friendly, then offers one simple yes-or-no follow-up so the customer can keep going without memorizing commands.",
           "examplePhrases": [
             "Alexa, open secret billionaire",
             "Alexa, ask secret billionaire for today's move",
@@ -28,7 +28,7 @@
         }
       },
       "isAvailableWorldwide": true,
-      "testingInstructions": "Test launch, today's move, mindset shift, business idea, ten X question, opportunity spotter, help, stop, and fallback. The skill is stateless and does not require account linking or customer-contact permissions. It uses OpenRouter with the Kimi 2.5 model to generate short branded business insights without sending customer contact information. If the API is unavailable, the skill falls back to an internal content library. Echo Show devices should render the branded APL background with the spoken insight and follow-up footer.",
+      "testingInstructions": "Test launch, today's move, mindset shift, business idea, ten X question, opportunity spotter, help, yes, no, stop, cancel, and fallback. After each primary insight, the skill recommends one next category and the customer can simply say yes or no. The skill is stateless and does not require account linking or customer-contact permissions. It uses OpenRouter with the Kimi 2.5 model to generate short branded business insights without sending customer contact information. If the API is unavailable, the skill falls back to an internal content library. Echo Show devices should render the branded APL response with the spoken insight, follow-up footer, and muted background video.",
       "category": "BUSINESS_AND_FINANCE",
       "distributionMode": "PUBLIC"
     },

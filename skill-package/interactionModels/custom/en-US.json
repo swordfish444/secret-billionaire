@@ -18,7 +18,11 @@
             "my move",
             "another move",
             "next move",
-            "give me a move"
+            "give me a move",
+            "something practical",
+            "give me something practical",
+            "what should I do next",
+            "what is my next move"
           ]
         },
         {
@@ -32,7 +36,9 @@
             "give me mindset",
             "another mindset shift",
             "next mindset shift",
-            "give me another mindset shift"
+            "give me another mindset shift",
+            "reframe that for me",
+            "give me a reframe"
           ]
         },
         {
@@ -48,7 +54,9 @@
             "another business idea",
             "next business idea",
             "give me another business idea",
-            "give me a startup idea"
+            "give me a startup idea",
+            "give me something I could build",
+            "what could I start"
           ]
         },
         {
@@ -63,7 +71,9 @@
             "give me ten x question",
             "ask me ten x question",
             "another ten x question",
-            "next ten x question"
+            "next ten x question",
+            "ask me a bigger question",
+            "give me a bigger question"
           ]
         },
         {
@@ -78,11 +88,33 @@
             "give me an opportunity",
             "another opportunity spotter",
             "next opportunity spotter",
-            "help me find an opportunity"
+            "help me find an opportunity",
+            "show me an opportunity",
+            "help me notice an opportunity"
+          ]
+        },
+        {
+          "name": "GetAnotherInsightIntent",
+          "samples": [
+            "another one",
+            "something else",
+            "give me another",
+            "next one",
+            "give me the next one",
+            "keep going",
+            "give me more"
           ]
         },
         {
           "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.YesIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NoIntent",
           "samples": []
         },
         {

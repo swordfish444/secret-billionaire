@@ -3,81 +3,118 @@ const CATEGORIES = {
     label: 'Business idea',
     promptLabel: 'Business Idea',
     repromptLabel: 'business idea',
+    suggestionLabel: 'a business idea',
   },
   MINDSET_SHIFT: {
     label: 'Mindset shift',
     promptLabel: 'Mindset Shift',
     repromptLabel: 'mindset shift',
+    suggestionLabel: 'a mindset shift',
   },
   OPPORTUNITY_SPOTTER: {
     label: 'Opportunity spotter',
     promptLabel: 'Opportunity Spotter',
     repromptLabel: 'opportunity spotter',
+    suggestionLabel: 'an opportunity spotter',
   },
   TEN_X_QUESTION: {
     label: '10X question',
     promptLabel: '10X Question',
     repromptLabel: 'ten X question',
+    suggestionLabel: 'a ten X question',
   },
   TODAYS_MOVE: {
     label: "Today's move",
     promptLabel: "Today's Move",
     repromptLabel: "today's move",
+    suggestionLabel: "today's move",
   },
 };
 
 const FALLBACK_INSIGHTS = {
   TODAYS_MOVE: [
-    "Today's move: audit one recurring task you still do by hand. If it happens every week, it deserves a system, not more of your time.",
-    "Today's move: call one customer, prospect, or operator and ask what slows them down every month. Recurring pain is where recurring revenue begins.",
-    "Today's move: find the step in your work that creates results but does not require your judgment. Standardize that step and buy your attention back.",
-    "Today's move: write down the one bottleneck that caps your growth right now. Do not attack five problems. Remove the gate and the rest starts moving.",
-    "Today's move: review where money enters your world and where trust enters your world. The highest-leverage business usually sits where those two already meet.",
-    "Today's move: list your last five wins and circle the one that could be packaged, repeated, or licensed. Wealth compounds when a result stops depending on your calendar.",
+    "Today's move: write down the last three things people asked you for help with. If the same problem appears twice, you may already be standing on a sellable offer.",
+    "Today's move: time one task you repeat every week. If it steals more than thirty minutes, turn it into a checklist, template, or small automation before you do it again.",
+    "Today's move: ask one friend, customer, or coworker what part of their week feels unnecessarily manual. Recurring friction is where useful businesses begin.",
+    "Today's move: find one service you deliver informally and package it into a simple fixed-price offer. Clarity converts faster than custom ambiguity.",
+    "Today's move: list the tools, contacts, or audience access you already control. Wealth usually starts by using existing leverage better, not by waiting for permission.",
+    "Today's move: look at the task people always procrastinate but still must finish. If you can make that easier, you are close to something people will pay for.",
+    "Today's move: choose one process in your work that only needs your standards, not your hands. Document it once and you stop paying for it with your time forever.",
+    "Today's move: check what people complain about right before they spend money. Pain closest to a purchase decision is often the easiest pain to monetize.",
   ],
   MINDSET_SHIFT: [
-    "Mindset shift: rich operators do not chase more effort. They chase assets, systems, and distribution that keep working after the day ends.",
-    "Mindset shift: if a decision only improves this week, it is probably too small. Build for the machine you want to own, not just the fire you want to put out.",
-    "Mindset shift: growth rarely comes from adding complexity first. It usually comes from removing friction where value is already trying to move.",
-    "Mindset shift: cash flow matters, but control matters more. The closer you are to the customer, the more options you own.",
-    "Mindset shift: a billionaire lens is not asking how to do more. It is asking what can be multiplied without multiplying your attention.",
-    "Mindset shift: the game changes when you stop selling hours and start owning the path customers return to by default.",
+    "Mindset shift: you do not need a giant company to think like an owner. You need to stop asking how to stay busy and start asking what keeps paying when you are offline.",
+    "Mindset shift: most people chase more income streams too early. One clean repeatable offer with real demand beats five scattered ideas every time.",
+    "Mindset shift: leverage is not only money or code. A template, a reputation, a niche audience, or a proven process can all multiply your next move.",
+    "Mindset shift: progress comes faster when you stop glorifying effort and start measuring repeatability. If a win cannot be repeated, it cannot compound.",
+    "Mindset shift: ownership starts the moment you build something people return to without needing a fresh explanation from you each time.",
+    "Mindset shift: the goal is not to sound bigger. The goal is to become easier to buy, easier to trust, and easier to repeat.",
+    "Mindset shift: people overestimate originality and underestimate observation. Better businesses often come from noticing what frustrates normal people every week.",
+    "Mindset shift: the smartest growth question is not what else can I add. It is what already works that deserves more reach, automation, or pricing power.",
   ],
   BUSINESS_IDEA: [
-    "Business idea: build a service that monitors expensive software subscriptions for small companies and flags waste each month. The problem is silent spend, the solution is continuous savings, and it scales through simple reporting plus recurring retainers.",
-    "Business idea: create an AI-assisted response desk for home service businesses that miss inbound leads after hours. The problem is lost revenue, the solution is instant qualification and booking, and it scales across repeatable local verticals.",
-    "Business idea: offer a lightweight compliance checklist platform for niche operators with ugly spreadsheet workflows. The problem is manual risk tracking, the solution is structured recurring workflows, and it scales because every operator in the niche shares the same burden.",
-    "Business idea: build a quoting tool for custom manufacturers that turn drawings into faster estimates. The problem is slow sales cycles, the solution is clearer pricing workflows, and it scales by becoming the system buyers rely on before production.",
-    "Business idea: launch a reputation-recovery service for businesses with poor follow-up after negative reviews. The problem is churn hidden in public trust, the solution is a repeatable customer recovery engine, and it scales with templates, automation, and niche focus.",
-    "Business idea: create a signal dashboard for e-commerce brands that ties inventory, ad performance, and margin into one daily brief. The problem is fragmented decisions, the solution is one operating view, and it scales as a subscription across brands with similar pain.",
+    "Business idea: build a done-for-you reminder and follow-up service for local businesses that still miss quotes and callbacks. The problem is lost revenue from slow follow-up, the solution is a lightweight response system, and it scales by templating the same workflow across trades.",
+    "Business idea: create a simple weekly numbers brief for solo business owners who hate spreadsheets. The problem is they cannot see what is working, the solution is one clear dashboard and summary, and it scales as a recurring subscription.",
+    "Business idea: offer a niche onboarding package for agencies or consultants who keep reinventing client setup. The problem is inconsistent delivery, the solution is a repeatable onboarding system, and it scales through templates plus lightweight automation.",
+    "Business idea: build a micro tool that turns messy voice notes into action lists for contractors, founders, or creators. The problem is ideas stay trapped in recordings, the solution is instant structure, and it scales because the workflow is common across industries.",
+    "Business idea: launch a review-reactivation service for businesses with old happy customers but weak referral flow. The problem is dormant trust, the solution is a system that revives testimonials and referrals, and it scales through simple recurring outreach.",
+    "Business idea: create a quote-and-scheduling assistant for high-ticket freelancers. The problem is slow back-and-forth before the sale, the solution is one streamlined booking flow, and it scales because every operator with custom work faces the same bottleneck.",
+    "Business idea: build a recurring cleanup service for small teams drowning in disconnected tools. The problem is duplicated admin work, the solution is monthly workflow simplification, and it scales by productizing the same audits and fixes.",
+    "Business idea: create a local business intelligence brief that shows owners what competitors are charging, promoting, and neglecting. The problem is blind decision making, the solution is a monthly strategic snapshot, and it scales city by city and niche by niche.",
   ],
   TEN_X_QUESTION: [
-    "10X question: what part of your business would still create value if you disappeared for thirty days, and why is that not the center of your strategy yet?",
-    "10X question: if you had to double revenue without adding headcount, which lever would you be forced to redesign first?",
-    "10X question: what does your customer repeatedly pay for after the sale, and how can you own more of that loop?",
-    "10X question: where are you still custom-building something the market clearly wants packaged?",
-    "10X question: which decision are you delaying because you are measuring comfort instead of leverage?",
-    "10X question: if a larger competitor copied your offer tomorrow, what advantage would still remain yours to scale?",
+    "10X question: if you had to grow your income without adding more working hours, what would you be forced to package, automate, or delegate first?",
+    "10X question: what do people already trust you for that could become a simple offer instead of a recurring favor?",
+    "10X question: where are you still creating value one conversation at a time when a system could be doing the first eighty percent for you?",
+    "10X question: if your current path stayed exactly the same for two years, what part of it would still fail to compound?",
+    "10X question: what does your customer struggle with before they buy from you, and why do you not own that part of the journey yet?",
+    "10X question: which part of your week feels small to you but would save someone else money, stress, or time immediately?",
+    "10X question: if you had to become known for solving one profitable problem in one niche, which problem would you choose and why?",
+    "10X question: what asset could you build once this quarter that would still help you sell, serve, or attract trust next year?",
   ],
   OPPORTUNITY_SPOTTER: [
-    "Opportunity spotter: watch for any business that still depends on someone remembering to follow up manually. That gap is often a product disguised as an annoyance.",
-    "Opportunity spotter: look for processes people explain with three different screenshots and an apology. Confusion with budget is an opportunity waiting for a cleaner system.",
-    "Opportunity spotter: pay attention to where owners say, nobody on my team does this the same way. Inconsistency is often the front door to a scalable tool.",
-    "Opportunity spotter: notice what businesses keep solving in Slack, text threads, and spreadsheets instead of software. That usually means the market pain is real and underserved.",
-    "Opportunity spotter: when someone says, I lose deals because I cannot respond fast enough, you are staring at a revenue leak, not just an inconvenience.",
-    "Opportunity spotter: any recurring task that requires copying data between two tools is worth studying. Friction repeated at scale is often where value hides.",
+    "Opportunity spotter: look for any business that relies on sticky notes, inbox flags, or memory to keep money from slipping away. Forgotten follow-up is often a product opportunity in disguise.",
+    "Opportunity spotter: notice where normal people keep saying, I know I should do this, but I never get around to it. Repeated avoidance often signals a business worth building.",
+    "Opportunity spotter: when a process requires a screen recording just to explain it, there is usually room for a clearer product, service, or automation.",
+    "Opportunity spotter: listen for phrases like, I always have to check three places for that. Fragmented information is one of the cleanest paths to a useful tool.",
+    "Opportunity spotter: watch for businesses that are busy but still slow. Bottlenecks inside demand are better than ideas without demand.",
+    "Opportunity spotter: anytime you see a person manually rewriting the same message for customers, leads, or staff, you are probably looking at monetizable friction.",
+    "Opportunity spotter: pay attention to what people complain about paying for, not just what they complain about using. Annoying expenses are where better offers can win fast.",
+    "Opportunity spotter: if a local operator says every day is different but the problems sound the same, there is probably a repeatable solution hiding under the chaos.",
   ],
 };
 
-function randomFromList(list) {
-  return list[Math.floor(Math.random() * list.length)];
+const FOLLOW_UP_OPTIONS = {
+  BUSINESS_IDEA: ['TODAYS_MOVE', 'OPPORTUNITY_SPOTTER', 'MINDSET_SHIFT'],
+  MINDSET_SHIFT: ['TODAYS_MOVE', 'TEN_X_QUESTION', 'BUSINESS_IDEA'],
+  OPPORTUNITY_SPOTTER: ['BUSINESS_IDEA', 'TODAYS_MOVE', 'MINDSET_SHIFT'],
+  TEN_X_QUESTION: ['TODAYS_MOVE', 'MINDSET_SHIFT', 'BUSINESS_IDEA'],
+  TODAYS_MOVE: ['MINDSET_SHIFT', 'BUSINESS_IDEA', 'TEN_X_QUESTION'],
+};
+
+function randomFromList(list, exclude = []) {
+  const blocked = new Set(exclude);
+  const filtered = list.filter((item) => !blocked.has(item));
+  const pool = filtered.length ? filtered : list;
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
-function fallbackInsightFor(category) {
-  return randomFromList(FALLBACK_INSIGHTS[category] || FALLBACK_INSIGHTS.TODAYS_MOVE);
+function fallbackInsightFor(category, { exclude = [] } = {}) {
+  return randomFromList(FALLBACK_INSIGHTS[category] || FALLBACK_INSIGHTS.TODAYS_MOVE, exclude);
+}
+
+function nextCategoryFor(category, { exclude = [] } = {}) {
+  const options = FOLLOW_UP_OPTIONS[category] || FOLLOW_UP_OPTIONS.TODAYS_MOVE;
+  return randomFromList(options, exclude);
+}
+
+function suggestionLabelFor(category) {
+  return CATEGORIES[category]?.suggestionLabel || CATEGORIES.TODAYS_MOVE.suggestionLabel;
 }
 
 module.exports = {
   CATEGORIES,
   fallbackInsightFor,
+  nextCategoryFor,
+  suggestionLabelFor,
 };
